@@ -1,0 +1,73 @@
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #282c34;
+}
+
+.auth-form {
+    background-color: #3a4049;
+    padding: 30px;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 400px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.auth-form h2 {
+    margin-top: 0;
+    text-align: center;
+}
+
+.auth-form input {
+    padding: 12px;
+    border-radius: 5px;
+    border: 1px solid #555;
+    background-color: #282c34;
+    color: white;
+    font-size: 16px;
+}
+
+.auth-form button {
+    padding: 12px;
+    border-radius: 5px;
+    border: none;
+    background-color: #61dafb;
+    color: #282c34;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.auth-form button:hover {
+    background-color: #82aaff;
+}
+
+.error-message {
+    color: #ff5555;
+    background-color: rgba(255, 85, 85, 0.1);
+    border: 1px solid #ff5555;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+/* Tambahkan ini di paling bawah AuthForm.css */
+.auth-link {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.auth-link a {
+    color: #61dafb;
+    text-decoration: none;
+}
+
+.auth-link a:hover {
+    text-decoration: underline;
+}
