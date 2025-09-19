@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify'; // <-- Import toast
 import './AuthForm.css';
 
 const RegisterPage = () => {
     const [formData, setFormData] = useState({ name: '', email: '', password: '' });
-    const [error, setError] = useState('');
     const navigate = useNavigate();
 
     const handleInputChange = (e) => {
@@ -16,10 +16,14 @@ const RegisterPage = () => {
         e.preventDefault();
         try {
             await axios.post('http://localhost:8080/api/auth/register', formData);
-            alert('Registrasi berhasil! Silakan login.');
+            
+            // Ganti alert dengan toast
+            toast.success('Registrasi berhasil! Silakan login.');
+
             navigate('/login'); // Arahkan ke halaman login setelah berhasil
         } catch (err) {
-            setError('Gagal melakukan registrasi. Email mungkin sudah digunakan.');
+            // Ganti setError dengan toast
+            toast.error('Gagal melakukan registrasi. Email mungkin sudah digunakan.');
             console.error("Registrasi gagal:", err);
         }
     };
@@ -28,7 +32,7 @@ const RegisterPage = () => {
         <div className="auth-container">
             <form onSubmit={handleSubmit} className="auth-form">
                 <h2>Registrasi</h2>
-                {error && <p className="error-message">{error}</p>}
+                {/* Bagian error tidak perlu lagi */}
                 <input type="text" name="name" placeholder="Nama Lengkap" required onChange={handleInputChange} />
                 <input type="email" name="email" placeholder="Email" required onChange={handleInputChange} />
                 <input type="password" name="password" placeholder="Password" required onChange={handleInputChange} />

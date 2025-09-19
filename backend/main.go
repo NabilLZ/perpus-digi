@@ -39,6 +39,7 @@ type Book struct {
 	Year          int    `json:"year"`
 	CoverImageURL string `json:"cover_image_url"`
 	BookFileURL   string `json:"book_file_url"`
+	Description   string `json:"description"` 
 }
 
 type User struct {
@@ -95,6 +96,7 @@ func main() {
 		books := api.Group("/books")
 		{
 			books.GET("", getBooks)
+			books.GET("/:id", getBook) // <-- RUTE BARU
 			books.POST("", AdminAuthMiddleware(), createBook)
 			books.PUT("/:id", AdminAuthMiddleware(), updateBook)
 			books.DELETE("/:id", AdminAuthMiddleware(), deleteBook)
@@ -418,4 +420,28 @@ func deleteBook(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Buku berhasil dihapus"})
+}
+
+// HANDLER BARU UNTUK MENGAMBIL SATU BUKU
+func getBook(c *gin.Context) {
+    idStr := c.Param("id")
+
+    var book Book
+    var coverURL, bookURL, description sql.NullString
+
+    err := db.QueryRow("SELECT id, title, author, publication_year, cover_image_url, book_file_url, description FROM books WHERE id = $1", idStr).Scan(&book.ID, &book.Title, &book.Author, &book.Year, &coverURL, &bookURL, &description)
+    if err != nil {
+        if err == sql.ErrNoRows {
+            c.JSON(http.StatusNotFound, gin.H{"error": "Book not found"})
+            return
+        }
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get book"})
+        return
+    }
+
+    book.CoverImageURL = coverURL.String
+    book.BookFileURL = bookURL.String
+    book.Description = description.String
+
+    c.IndentedJSON(http.StatusOK, book)
 }
