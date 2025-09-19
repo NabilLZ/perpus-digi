@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; // <-- TAMBAHKAN 'Link' DI SINI
 import '../App.css';
 
 const api = axios.create({ baseURL: 'http://localhost:8080/api' });
@@ -124,10 +124,14 @@ function BooksPage() {
   return (
     <div className="App">
       <header className="App-header">
-        <div className="header-content">
-            <h1>Selamat Datang, {user.name}!</h1>
-            <button onClick={handleLogout} className="logout-btn">Logout</button>
-        </div>
+          <div className="header-content">
+              <h1>Selamat Datang, {user.name}!</h1>
+              <div className="top-nav-links">
+                  {/* LINK BARU HANYA UNTUK ADMIN */}
+                  {isAdmin && <Link to="/admin" className="nav-link">Manajemen Pengguna</Link>}
+                  <button onClick={handleLogout} className="logout-btn">Logout</button>
+              </div>
+          </div>
         
         <form className="search-form" onSubmit={handleSearchSubmit}>
           <input type="text" placeholder="Cari..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />

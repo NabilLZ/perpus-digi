@@ -4,6 +4,7 @@ import { jwtDecode } from 'jwt-decode'; // <-- Impor library yang baru diinstal
 import { Link, useNavigate } from 'react-router-dom';
 import './AuthForm.css';
 
+
 const LoginPage = () => {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [error, setError] = useState('');

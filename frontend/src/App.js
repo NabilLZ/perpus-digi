@@ -1,14 +1,29 @@
 import React from 'react';
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import BooksPage from './pages/BooksPage';
 import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage'; // Pastikan import ini tidak dikomentari
+import RegisterPage from './pages/RegisterPage';
+import AdminDashboard from './pages/AdminDashboard';
 import './App.css';
 
-// Komponen Pembantu untuk Rute yang Dilindungi
+// Penjaga Gerbang Biasa: Cukup pastikan sudah login
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem('token');
   return token ? children : <Navigate to="/login" />;
+};
+
+// PENJAGA GERBANG BARU YANG LEBIH PINTAR: Pastikan sudah login DAN perannya admin
+const AdminRoute = ({ children }) => {
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user'));
+    
+    // Cek apakah ada token DAN peran pengguna adalah 'pustakawan'
+    if (token && user && user.role === 'pustakawan') {
+        return children; // Izinkan masuk
+    } else {
+        return <Navigate to="/" />; // Jika bukan admin, tendang ke halaman utama
+    }
 };
 
 function App() {
@@ -16,21 +31,20 @@ function App() {
     <Router>
       <div>
         <Routes>
-          {/* Rute publik, siapa saja bisa akses */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           
-          {/* Rute utama (homepage) sekarang dilindungi */}
           <Route 
             path="/" 
-            element={
-              <PrivateRoute>
-                <BooksPage />
-              </PrivateRoute>
-            } 
+            element={<PrivateRoute><BooksPage /></PrivateRoute>} 
           />
           
-          {/* Rute "tangkap semua" jika halaman tidak ditemukan, arahkan ke homepage */}
+          {/* RUTE ADMIN SEKARANG DIJAGA OLEH PENJAGA BARU */}
+          <Route 
+            path="/admin" 
+            element={<AdminRoute><AdminDashboard /></AdminRoute>} 
+          />
+          
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>

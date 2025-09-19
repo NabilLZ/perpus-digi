@@ -1,217 +1,648 @@
+/* ===== ROOT VARIABLES ===== */
+:root {
+  --primary-bg: #0f172a;
+  --secondary-bg: #1e293b;
+  --card-bg: #334155;
+  --accent-color: #3b82f6;
+  --accent-hover: #2563eb;
+  --success-color: #10b981;
+  --success-hover: #059669;
+  --warning-color: #f59e0b;
+  --warning-hover: #d97706;
+  --danger-color: #ef4444;
+  --danger-hover: #dc2626;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --border-color: #475569;
+  --shadow-light: rgba(59, 130, 246, 0.1);
+  --shadow-strong: rgba(0, 0, 0, 0.3);
+  --gradient-primary: linear-gradient(135deg, var(--accent-color), #8b5cf6);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --border-radius: 16px;
+  --border-radius-sm: 8px;
+}
+
+/* ===== GLOBAL STYLES ===== */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--primary-bg);
+  color: var(--text-primary);
+}
+
+/* ===== APP CONTAINER ===== */
 .App {
   text-align: center;
+  min-height: 100vh;
 }
 
 .App-header {
-  background-color: #282c34;
+  background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 100%);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: var(--text-primary);
   padding: 20px;
+  position: relative;
+  overflow-x: hidden;
 }
 
-/* Mengganti nama class form agar lebih umum */
-.book-form {
-  background-color: #3a4049;
-  padding: 20px;
-  border-radius: 8px;
+/* Animated background */
+.App-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
+  animation: pulse 15s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+}
+
+/* ===== HEADER CONTENT ===== */
+.header-content {
+  width: 95%;
+  max-width: 1400px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 30px;
+  position: relative;
+  z-index: 10;
+  padding: 20px;
+  background: rgba(51, 65, 85, 0.3);
+  backdrop-filter: blur(10px);
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.top-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+.nav-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: var(--border-radius-sm);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-link::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: var(--gradient-primary);
+  transition: left 0.3s;
+  z-index: -1;
+}
+
+.nav-link:hover {
+  color: var(--text-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px var(--shadow-light);
+}
+
+.nav-link:hover::before {
+  left: 0;
+}
+
+/* ===== FORM STYLES ===== */
+.book-form {
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  padding: 30px;
+  border-radius: var(--border-radius);
+  margin-bottom: 40px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  width: 80%;
-  max-width: 500px;
+  gap: 20px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 
+    0 20px 25px -5px var(--shadow-strong),
+    0 10px 10px -5px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 5;
+  animation: slideIn 0.6s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .book-form h3 {
-  margin-top: 0;
-  margin-bottom: 10px;
+  margin: 0 0 10px 0;
+  font-size: 24px;
+  font-weight: 700;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .book-form input {
-  padding: 10px;
-  border-radius: 5px;
-  border: 1px solid #555;
-  background-color: #282c34;
-  color: white;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 2px solid var(--border-color);
+  background: var(--secondary-bg);
+  color: var(--text-primary);
   font-size: 16px;
+  font-weight: 500;
+  transition: var(--transition);
+  outline: none;
 }
 
+.book-form input:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px var(--shadow-light);
+  transform: translateY(-2px);
+}
+
+.book-form input::placeholder {
+  color: var(--text-muted);
+}
+
+/* ===== BUTTON STYLES ===== */
 .book-form button {
-  padding: 10px;
-  border-radius: 5px;
+  padding: 14px 24px;
+  border-radius: 12px;
   border: none;
-  background-color: #61dafb;
-  color: #282c34;
   font-size: 16px;
-  font-weight: bold;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
-  flex-grow: 1; /* Membuat tombol memenuhi ruang */
+  transition: var(--transition);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+.book-form button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.book-form button:hover::before {
+  left: 100%;
 }
 
 .book-form button:hover {
-  background-color: #82aaff;
+  transform: translateY(-3px);
+}
+
+/* Primary Button */
+.book-form button:not(.cancel-btn) {
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.book-form button:not(.cancel-btn):hover {
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+}
+
+/* Cancel Button */
+.cancel-btn {
+  background: linear-gradient(135deg, #6c757d, #8d959c) !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+.cancel-btn:hover {
+  box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4) !important;
 }
 
 .form-buttons {
   display: flex;
-  gap: 10px;
+  gap: 15px;
 }
 
-.cancel-btn {
-  background-color: #6c757d !important;
-  color: white !important;
-}
-
-.cancel-btn:hover {
-  background-color: #8d959c !important;
-}
-
-/* Gaya untuk daftar buku */
-.book-list {
-  width: 80%;
-  max-width: 700px;
-}
-
-.book-item {
-  background-color: #444c56;
-  border-radius: 8px;
-  padding: 10px 20px;
-  margin-bottom: 15px;
-  text-align: left;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.book-item h3 {
-  margin-top: 0;
-  color: #82aaff;
-}
-
-.book-item p {
-  margin: 0;
-}
-
-.book-actions {
-  display: flex;
-  gap: 10px; /* Memberi jarak antar tombol */
-}
-
-.edit-btn, .delete-btn {
-  padding: 8px 12px;
-  border-radius: 5px;
-  border: none;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.edit-btn {
-  background-color: #ffc107;
-}
-
-.edit-btn:hover {
-  background-color: #ffd54f;
-}
-
-.delete-btn {
-  background-color: #ff5555;
-}
-
-.delete-btn:hover {
-  background-color: #ff7777;
-}
-
-/* ... (semua CSS lama biarkan saja) ... */
-
-.book-cover {
-  width: 60px;
-  height: 90px;
-  object-fit: cover;
-  border-radius: 4px;
-  margin-right: 20px;
-}
-
-.book-details {
-  flex-grow: 1;
-}
-
-.book-item {
-  /* ... (gaya book-item yang lama) ... */
-  align-items: flex-start; /* Mengubah alignment agar lebih rapi dengan gambar */
-}
-
-/* Tambahkan ini di paling bawah App.css */
-.read-btn {
-  padding: 8px 12px;
-  border-radius: 5px;
-  border: none;
-  background-color: #28a745; /* Warna hijau */
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  text-decoration: none; /* Menghilangkan garis bawah dari link */
-  display: inline-block;
-  font-size: 14px;
-}
-
-.read-btn:hover {
-  background-color: #218838;
-}
-
-/* Tambahkan ini di App.css */
+/* ===== SEARCH FORM ===== */
 .search-form {
-  margin: 20px 0;
+  margin: 30px 0;
   display: flex;
-  width: 80%;
-  max-width: 700px;
-  gap: 10px;
+  width: 90%;
+  max-width: 800px;
+  gap: 15px;
+  position: relative;
+  z-index: 5;
 }
 
 .search-form input {
   flex-grow: 1;
-  padding: 10px;
-  border-radius: 5px;
-  border: 1px solid #555;
-  background-color: #282c34;
-  color: white;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 2px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-primary);
   font-size: 16px;
+  outline: none;
+  transition: var(--transition);
+}
+
+.search-form input:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px var(--shadow-light);
 }
 
 .search-form button {
-  padding: 10px 20px;
-  border-radius: 5px;
+  padding: 16px 30px;
+  border-radius: 12px;
   border: none;
-  background-color: #82aaff;
-  color: #282c34;
-  font-weight: bold;
+  background: var(--gradient-primary);
+  color: white;
+  font-weight: 600;
   cursor: pointer;
+  transition: var(--transition);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-/* Tambahkan ini di App.css */
+.search-form button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+}
+
+/* ===== BOOK LIST ===== */
+.book-list {
+  width: 90%;
+  max-width: 1000px;
+  position: relative;
+  z-index: 5;
+}
+
+.book-item {
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  border-radius: var(--border-radius);
+  padding: 25px;
+  margin-bottom: 20px;
+  text-align: left;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  box-shadow: 
+    0 10px 15px -3px var(--shadow-strong),
+    0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.book-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--gradient-primary);
+  transform: scaleY(0);
+  transition: transform 0.3s;
+}
+
+.book-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 
+    0 20px 25px -5px var(--shadow-strong),
+    0 10px 10px -5px rgba(0, 0, 0, 0.3);
+}
+
+.book-item:hover::before {
+  transform: scaleY(1);
+}
+
+.book-cover {
+  width: 80px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: var(--border-radius-sm);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+  transition: var(--transition);
+}
+
+.book-item:hover .book-cover {
+  transform: scale(1.05);
+}
+
+.book-details {
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.book-item h3 {
+  margin: 0 0 10px 0;
+  color: var(--accent-color);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.book-item p {
+  margin: 5px 0;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* ===== ACTION BUTTONS ===== */
+.book-actions {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.edit-btn, .delete-btn, .read-btn {
+  padding: 10px 16px;
+  border-radius: var(--border-radius-sm);
+  border: none;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+.edit-btn {
+  background: linear-gradient(135deg, var(--warning-color), var(--warning-hover));
+  box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+}
+
+.edit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+}
+
+.delete-btn {
+  background: linear-gradient(135deg, var(--danger-color), var(--danger-hover));
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+}
+
+.delete-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+}
+
+.read-btn {
+  background: linear-gradient(135deg, var(--success-color), var(--success-hover));
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+}
+
+.read-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+/* ===== PAGINATION ===== */
 .pagination-controls {
-  margin-top: 30px;
+  margin: 40px 0;
   display: flex;
   align-items: center;
-  gap: 15px;
+  justify-content: center;
+  gap: 20px;
+  position: relative;
+  z-index: 5;
 }
+
 .pagination-controls button {
-  padding: 8px 16px;
-  border-radius: 5px;
+  padding: 12px 20px;
+  border-radius: var(--border-radius-sm);
   border: none;
-  background-color: #82aaff;
-  color: #282c34;
-  font-weight: bold;
+  background: var(--gradient-primary);
+  color: white;
+  font-weight: 600;
   cursor: pointer;
+  transition: var(--transition);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
+
+.pagination-controls button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+}
+
 .pagination-controls button:disabled {
-  background-color: #444c56;
+  background: var(--border-color);
   cursor: not-allowed;
+  opacity: 0.5;
 }
+
+.pagination-controls span {
+  color: var(--text-secondary);
+  font-weight: 500;
+  padding: 0 15px;
+}
+
+/* ===== USER TABLE ===== */
+.user-table-container {
+  width: 90%;
+  max-width: 1200px;
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  padding: 30px;
+  border-radius: var(--border-radius);
+  box-shadow: 
+    0 20px 25px -5px var(--shadow-strong),
+    0 10px 10px -5px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 5;
+  animation: slideIn 0.6s ease-out;
+}
+
+.user-table-container h3 {
+  margin: 0 0 20px 0;
+  font-size: 24px;
+  font-weight: 700;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  color: var(--text-primary);
+  overflow: hidden;
+  border-radius: var(--border-radius-sm);
+}
+
+th, td {
+  border: 1px solid var(--border-color);
+  padding: 16px 20px;
+  text-align: left;
+  transition: var(--transition);
+}
+
+th {
+  background: var(--secondary-bg);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 14px;
+  color: var(--accent-color);
+}
+
+tr:nth-child(even) {
+  background: rgba(71, 85, 105, 0.3);
+}
+
+tr:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.action-cell {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+  
+  .top-nav-links {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .book-form,
+  .search-form,
+  .book-list,
+  .user-table-container {
+    width: 95%;
+  }
+  
+  .book-item {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .book-cover {
+    align-self: center;
+  }
+  
+  .book-actions {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .search-form {
+    flex-direction: column;
+  }
+  
+  .pagination-controls {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  table, th, td {
+    font-size: 14px;
+    padding: 12px 8px;
+  }
+  
+  .action-cell {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .App-header {
+    padding: 10px;
+  }
+  
+  .book-form,
+  .user-table-container {
+    padding: 20px;
+  }
+  
+  .book-item {
+    padding: 20px;
+  }
+  
+  .book-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .edit-btn, .delete-btn, .read-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ===== LOGOUT BUTTON ===== */
+.logout-btn {
+  background: linear-gradient(135deg, var(--danger-color), var(--danger-hover));
+  color: white;
+  font-weight: 600;
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+}
+
