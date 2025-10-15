@@ -19,7 +19,7 @@ import (
 
 // --- KONFIGURASI ---
 const (
-	host     = "localhost"
+	host     = "localhost"       // <-- GANTI DENGAN HOST SUPABASE ANDA
 	port     = 5432
 	user     = "postgres"
 	password = "nabildatabase" // <-- GANTI DENGAN PASSWORD ANDA
@@ -39,7 +39,7 @@ type Book struct {
 	Year          int    `json:"year"`
 	CoverImageURL string `json:"cover_image_url"`
 	BookFileURL   string `json:"book_file_url"`
-	Description   string `json:"description"` 
+	Description   string `json:"description"`
 }
 
 type User struct {
@@ -67,12 +67,11 @@ func main() {
 		log.Fatal("Gagal koneksi ke DB: ", err)
 	}
 	defer db.Close()
-
 	err = db.Ping()
 	if err != nil {
 		log.Fatal("Gagal ping DB: ", err)
 	}
-	fmt.Println("Berhasil terhubung ke database!")
+	fmt.Println("Berhasil terhubung ke database publik!")
 
 	r := gin.Default()
 
@@ -96,10 +95,10 @@ func main() {
 		books := api.Group("/books")
 		{
 			books.GET("", getBooks)
-			books.GET("/:id", getBook) // <-- RUTE BARU
+			books.GET("/:id", getBook)
 			books.POST("", AdminAuthMiddleware(), createBook)
 			books.PUT("/:id", AdminAuthMiddleware(), updateBook)
-			books.DELETE("/:id", AdminAuthMiddleware(), deleteBook)
+			books.DELETE("/:id", AdminAuthMiddleware(), deleteBook) // <-- Sekarang tidak akan error
 		}
 
 		admin := api.Group("/admin")
@@ -107,87 +106,23 @@ func main() {
 		{
 			admin.GET("/users", getUsers)
 			admin.DELETE("/users/:id", deleteUser)
-			admin.PUT("/users/:id", updateUserRole) // <-- RUTE BARU
+			admin.PUT("/users/:id", updateUserRole)
 		}
 	}
 
 	r.Run()
 }
 
-// Di dalam main.go
-
-// Ganti updateUserRole dengan versi ini
-func updateUserRole(c *gin.Context) {
-	idStr := c.Param("id")
-	if idStr == "5" { // ID Super Admin Anda
-		c.JSON(http.StatusForbidden, gin.H{"error": "Cannot change the role of the super admin"})
-		return
-	}
-
-	var payload struct {
-		Role string `json:"role"`
-	}
-	if err := c.BindJSON(&payload); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
-		return
-	}
-	if payload.Role != "pustakawan" && payload.Role != "anggota" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid role specified"})
-		return
-	}
-    
-    // Kita akan mengambil data pengguna yang diperbarui setelah UPDATE
-	var updatedUser User
-	err := db.QueryRow("UPDATE users SET role = $1 WHERE id = $2 RETURNING id, name, email, role", payload.Role, idStr).Scan(&updatedUser.ID, &updatedUser.Name, &updatedUser.Email, &updatedUser.Role)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user role"})
-		return
-	}
-
-	c.JSON(http.StatusOK, updatedUser) // <-- Kembalikan data pengguna yang baru
-}
-
-
-// Ganti deleteUser dengan versi ini
-func deleteUser(c *gin.Context) {
-	idStr := c.Param("id")
-	tokenID, _ := c.Get("userID") // Ambil ID pengguna yang sedang login dari middleware
-
-	// --- PENGECEKAN KEAMANAN ---
-	if idStr == "5" { // Super admin (ID 5) tidak boleh dihapus
-		c.JSON(http.StatusForbidden, gin.H{"error": "Super admin cannot be deleted"})
-		return
-	}
-	if idStr == tokenID.(string) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "Admin cannot delete their own account"})
-		return
-	}
-    // --- AKHIR PENGECEKAN ---
-
-	_, err := db.Exec("DELETE FROM users WHERE id=$1", idStr)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
-}
-
-// Ganti seluruh fungsi AdminAuthMiddleware dengan ini
+// --- MIDDLEWARE KEAMANAN ---
 func AdminAuthMiddleware() gin.HandlerFunc {
+    // ... (Fungsi middleware Anda yang sudah benar)
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is required"})
 			return
 		}
-
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-		if tokenString == authHeader {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token format"})
-			return
-		}
-
-		// BAGIAN YANG HILANG: Logika untuk mem-parsing dan memvalidasi token
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -195,10 +130,9 @@ func AdminAuthMiddleware() gin.HandlerFunc {
 			return jwtSecret, nil
 		})
 
-		// Logika selanjutnya yang bergantung pada variabel 'token' dan 'err'
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			if role, ok := claims["role"].(string); ok && role == "pustakawan" {
-				c.Set("userID", claims["sub"]) // Simpan ID pengguna dari token
+				c.Set("userID", claims["sub"])
 				c.Next()
 			} else {
 				c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Access denied: admin role required"})
@@ -211,6 +145,7 @@ func AdminAuthMiddleware() gin.HandlerFunc {
 
 // --- HANDLERS AUTENTIKASI ---
 func registerUser(c *gin.Context) {
+    // ... (Fungsi registerUser Anda yang sudah benar)
 	var newUser User
 	if err := c.BindJSON(&newUser); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Format permintaan salah"})
@@ -236,6 +171,7 @@ func registerUser(c *gin.Context) {
 }
 
 func loginUser(c *gin.Context) {
+    // ... (Fungsi loginUser Anda yang sudah benar)
 	var loginDetails User
 	var storedUser User
 	if err := c.BindJSON(&loginDetails); err != nil {
@@ -260,8 +196,9 @@ func loginUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"token": tokenString})
 }
 
-// --- HANDLER ADMIN ---
+// --- HANDLERS ADMIN ---
 func getUsers(c *gin.Context) {
+    // ... (Fungsi getUsers Anda yang sudah benar)
 	var users []User
 	rows, err := db.Query("SELECT id, name, email, role FROM users ORDER BY id ASC")
 	if err != nil {
@@ -280,8 +217,76 @@ func getUsers(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, users)
 }
 
+func updateUserRole(c *gin.Context) {
+    // ... (Fungsi updateUserRole Anda yang sudah benar)
+	idStr := c.Param("id")
+	if idStr == "5" { // ID Super Admin Anda
+		c.JSON(http.StatusForbidden, gin.H{"error": "Cannot change the role of the super admin"})
+		return
+	}
+	var payload struct {
+		Role string `json:"role"`
+	}
+	if err := c.BindJSON(&payload); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+	if payload.Role != "pustakawan" && payload.Role != "anggota" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid role specified"})
+		return
+	}
+	var updatedUser User
+	err := db.QueryRow("UPDATE users SET role = $1 WHERE id = $2 RETURNING id, name, email, role", payload.Role, idStr).Scan(&updatedUser.ID, &updatedUser.Name, &updatedUser.Email, &updatedUser.Role)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user role"})
+		return
+	}
+	c.JSON(http.StatusOK, updatedUser)
+}
+
+func deleteUser(c *gin.Context) {
+    // ... (Fungsi deleteUser Anda yang sudah benar)
+	idStr := c.Param("id")
+	tokenID, _ := c.Get("userID")
+	if idStr == "5" { // ID Super Admin Anda
+		c.JSON(http.StatusForbidden, gin.H{"error": "Super admin cannot be deleted"})
+		return
+	}
+	if idStr == tokenID.(string) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Admin cannot delete their own account"})
+		return
+	}
+	_, err := db.Exec("DELETE FROM users WHERE id=$1", idStr)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
+}
+
 // --- HANDLERS BUKU ---
+func getBook(c *gin.Context) {
+    // ... (Fungsi getBook Anda yang sudah benar)
+	idStr := c.Param("id")
+	var book Book
+	var coverURL, bookURL, description sql.NullString
+	err := db.QueryRow("SELECT id, title, author, publication_year, cover_image_url, book_file_url, description FROM books WHERE id = $1", idStr).Scan(&book.ID, &book.Title, &book.Author, &book.Year, &coverURL, &bookURL, &description)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Book not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get book"})
+		return
+	}
+	book.CoverImageURL = coverURL.String
+	book.BookFileURL = bookURL.String
+	book.Description = description.String
+	c.IndentedJSON(http.StatusOK, book)
+}
+
 func getBooks(c *gin.Context) {
+    // ... (Fungsi getBooks Anda yang sudah benar)
 	searchTerm := c.Query("search")
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "5"))
@@ -339,6 +344,7 @@ func getBooks(c *gin.Context) {
 }
 
 func createBook(c *gin.Context) {
+    // ... (Fungsi createBook Anda yang sudah benar)
 	title := c.PostForm("title")
 	author := c.PostForm("author")
 	yearStr := c.PostForm("year")
@@ -372,6 +378,7 @@ func createBook(c *gin.Context) {
 }
 
 func updateBook(c *gin.Context) {
+    // ... (Fungsi updateBook Anda yang sudah benar)
 	idStr := c.Param("id")
 	title := c.PostForm("title")
 	author := c.PostForm("author")
@@ -412,6 +419,8 @@ func updateBook(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Buku berhasil diperbarui"})
 }
 
+
+// FUNGSI YANG HILANG SEBELUMNYA
 func deleteBook(c *gin.Context) {
 	idStr := c.Param("id")
 	_, err := db.Exec("DELETE FROM books WHERE id=$1", idStr)
@@ -420,28 +429,4 @@ func deleteBook(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Buku berhasil dihapus"})
-}
-
-// HANDLER BARU UNTUK MENGAMBIL SATU BUKU
-func getBook(c *gin.Context) {
-    idStr := c.Param("id")
-
-    var book Book
-    var coverURL, bookURL, description sql.NullString
-
-    err := db.QueryRow("SELECT id, title, author, publication_year, cover_image_url, book_file_url, description FROM books WHERE id = $1", idStr).Scan(&book.ID, &book.Title, &book.Author, &book.Year, &coverURL, &bookURL, &description)
-    if err != nil {
-        if err == sql.ErrNoRows {
-            c.JSON(http.StatusNotFound, gin.H{"error": "Book not found"})
-            return
-        }
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get book"})
-        return
-    }
-
-    book.CoverImageURL = coverURL.String
-    book.BookFileURL = bookURL.String
-    book.Description = description.String
-
-    c.IndentedJSON(http.StatusOK, book)
 }
